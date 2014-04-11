@@ -24,6 +24,7 @@ cdef extern from "ISocket.h" namespace "yampl":
 	cdef cppclass ISocket:
 		void send(void *, size_t) except +
 		size_t recv(void *&buffer) except +
+		ssize_t tryRecv(void *&buffer) except +
 
 cdef extern from "SocketFactory.h" namespace "yampl":
 	cdef cppclass SocketFactory:
@@ -80,10 +81,29 @@ cdef class PySocket:
 		free(msg)
 		return (size, obj)
 
+	def try_recv(self):
+		cdef char *msg = NULL
+		size = self.socket.tryRecv(msg)
+		obj = ''
+		if size != -1:
+			obj = pickle.loads(PyBytes_FromStringAndSize(msg, size));
+			free(msg)
+		return (size, obj)
+
 	def recv_raw(self):
 		cdef char *msg = NULL
 		size = self.socket.recv(msg)
 		obj = PyBytes_FromStringAndSize(msg, size)
+		free(msg)
+		return (size, obj)
+
+	def try_recv_raw(self):
+		cdef char *msg = NULL
+		size = self.socket.tryRecv(msg)
+		obj = ''
+		if size != -1:
+			obj = PyBytes_FromStringAndSize(msg, size)
+			free(msg)
 		return (size, obj)
 
 cdef class ClientSocket(PySocket):
