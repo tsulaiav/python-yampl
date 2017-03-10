@@ -1,0 +1,30 @@
+These instructions assume that you have Yampl C++ library installed
+at ${YAMPL_INSTALL} and Cython installed at ${CYTHON_INSTALL}
+
+>>> Build instructions:
+
+1. export PKG_CONFIG_PATH=${YAMPL_INSTALL}/lib/pkgconfig
+
+2. Configure Cython
+export PYTHONPATH=${CYTHON_INSTALL}:$PYTHONPATH
+export PATH=${CYTHON_INSTALL}/bin:$PATH
+
+3. From python-yampl root directory do
+python setup.py build_ext
+
+>>> Alternative build instructions
+
+If the above instructions do not work (by some strange reason) try this:
+
+1. Comment out these lines in setup.py
+
+yampl_include = subprocess.check_output(["pkg-config", "yampl", "--cflags"]).decode("utf-8")[2:-2]
+yampl_libs = subprocess.check_output(["pkg-config", "yampl", "--libs"]).decode("utf-8")[:-2]
+yampl_include_2 = yampl_include.replace("/include/yampl","/include")
+
+              include_dirs=[yampl_include,yampl_include_2],
+              extra_link_args=[yampl_libs],
+
+2. from python-yampl root directory do
+CFLAGS="-I$YAMPL_INSTALL/include/yampl -I$YAMPL_INSTALL/include" LDFLAGS="-L$YAMPL_INSTALL/lib" python setup.py build_ext
+
